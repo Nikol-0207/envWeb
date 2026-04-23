@@ -4,41 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ data.title }}</title>
-    <style>
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            width: 300px;
-            margin: 0 auto;
-        }
-
-        .square {
-            width: 100px;
-            height: 100px;
-            border: 2px solid black;
-            font-size: 50px;
-            text-align: center;
-            cursor: pointer;
-        }
-
-        .square:hover {
-            background-color: #ccc;
-        }
-
-        .playerX {
-            color: blue;
-        }
-
-        .playerO {
-            color: red;
-        }
-
-        #message {
-            text-align: center;
-            font-size: 20px;
-            margin-top: 20px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <h1>{{ data.message }}</h1>
