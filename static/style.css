@@ -1,33 +1,107 @@
-.container {
-            display: flex;
-            flex-wrap: wrap;
-            width: 300px;
-            margin: 0 auto;
-        }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-        .square {
-            width: 100px;
-            height: 100px;
-            border: 2px solid black;
-            font-size: 50px;
-            text-align: center;
-            cursor: pointer;
-        }
+body {
+    font-family: sans-serif;
+    background-color: #f0f0f0;
+    height: 100vh;
+}
 
-        .square:hover {
-            background-color: #ccc;
-        }
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
 
-        .playerX {
-            color: blue;
-        }
+/* Distribución de la parte superior */
+.main-layout {
+    display: flex;
+    flex: 1; /* Ocupa todo el espacio menos el footer */
+}
 
-        .playerO {
-            color: red;
-        }
+/* Sidebar (Gris claro) */
+.sidebar {
+    width: 250px;
+    background-color: #d9d9d9;
+    margin: 10px;
+    border-radius: 5px;
+    padding: 10px;
+}
 
-        #message {
-            text-align: center;
-            font-size: 20px;
-            margin-top: 20px;
-        }
+.dropdown-header {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.sidebar-content label {
+    display: block;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.sidebar-content input {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ccc;
+}
+.sidebar-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, opacity 0.2s ease;
+    max-height: 200px; /* Un valor lo suficientemente alto */
+    opacity: 1;
+}
+
+.sidebar-content.hidden {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Animación de la flecha */
+.arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.arrow.collapsed {
+    transform: rotate(180deg); /* El triángulo ▲ apuntará hacia abajo ▼ */
+}
+
+/* Contenedor del Canvas */
+.canvas-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* El cuadro del Quadtree */
+.quadtree-canvas {
+    width: 600px;
+    height: 500px;
+    background-color: black;
+    position: relative;
+    overflow: hidden;
+    cursor: crosshair;
+}
+
+.footer {
+    height: 40px;
+    background-color: #9da1cc;
+    width: 100%;
+}
+
+.stats {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #444;
+}

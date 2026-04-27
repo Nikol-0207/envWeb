@@ -3,79 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ data.title }}</title>
+    <title>Simulador de Quadtree</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/jpg" href="{{ url_for('static', filename='image/index.jpg') }}">
 </head>
 <body>
-    <h1>{{ data.message }}</h1>
-    <div class="container">
-        <div class="square" data-cell="0"></div>
-        <div class="square" data-cell="1"></div>
-        <div class="square" data-cell="2"></div>
-        <div class="square" data-cell="3"></div>
-        <div class="square" data-cell="4"></div>
-        <div class="square" data-cell="5"></div>
-        <div class="square" data-cell="6"></div>
-        <div class="square" data-cell="7"></div>
-        <div class="square" data-cell="8"></div>
+
+    <div class="app-container">
+        <div class="main-layout">
+            
+            <aside class="sidebar">
+                <div class="dropdown-header" id="toggle-params" style="cursor: pointer;">
+                    <span>Parámetros</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="sidebar-content" id="params-content">
+                    <label for="capacidad">Capacidad:</label>
+                    <input type="number" id="capacidad" value="4" min="4" >
+                    
+                    <p class="stats">Puntos: <span id="count">0</span></p>
+                </div>
+            </aside>
+
+            <section class="canvas-container">
+                <div id="canvas" class="quadtree-canvas">
+                    
+                </div>
+            </section>
+
+        </div>
+
+        <footer class="footer"> </footer>
     </div>
-
-    <div id="message"></div>
-
-    <script>
-        const squares = document.querySelectorAll('.square');
-        const message = document.getElementById('message');
-
-        let currentPlayer = 'X';
-
-        squares.forEach(square => {
-            square.addEventListener('click', () => {
-                if (square.textContent === '') {
-                    square.textContent = currentPlayer;
-                    checkWinner();
-                    if (currentPlayer === 'X') {
-                        currentPlayer = 'O';
-                    } else {
-                        currentPlayer = 'X';
-                    }
-                }
-            });
-        });
-
-        function checkWinner() {
-            const winningConditions = [
-                [0, 1, 2],
-                [3, 4, 5],
-                [6, 7, 8],
-                [0, 3, 6],
-                [1, 4, 7],
-                [2, 5, 8],
-                [0, 4, 8],
-                [2, 4, 6]
-            ];
-
-            for (let i = 0; i < winningConditions.length; i++) {
-                const condition = winningConditions[i];
-                if (squares[condition[0]].textContent === currentPlayer &&
-                    squares[condition[1]].textContent === currentPlayer &&
-                    squares[condition[2]].textContent === currentPlayer) {
-                    message.textContent = `¡Ganó el jugador ${currentPlayer}!`;
-                    return;
-                }
-            }
-
-            let isDraw = true;
-            for (let i = 0; i < squares.length; i++) {
-                if (squares[i].textContent === '') {
-                    isDraw = false;
-                    break;
-                }
-            }
-
-            if (isDraw) {
-                message.textContent = '¡Empate!';
-            }
-        }
-    </script>
-</body>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    </body>
 </html>
