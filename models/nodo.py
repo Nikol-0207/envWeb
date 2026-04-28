@@ -117,3 +117,16 @@ class NodoQuad:
         self.se = NodoQuad(cuadrantes['se'], self.capacidad)
     
         self.dividido = True
+    def buscar(self, rango, encontrados):
+        if not self.limite.intersects(rango):
+            return
+    
+        for p in self.puntos:
+            if rango.contains(p):
+                encontrados.append(p)
+            
+        if self.dividido:
+            self.nw.buscar(rango, encontrados)
+            self.ne.buscar(rango, encontrados)
+            self.sw.buscar(rango, encontrados)
+            self.se.buscar(rango, encontrados)

@@ -21,19 +21,30 @@
                     <label for="capacidad">Capacidad:</label>
                     <input type="number" id="capacidad" value="4" min="4" >
                     
+
+    
                     <p class="stats">Puntos: <span id="count">0</span></p>
+                    <label for="color-picker" style="margin-top: 15px;">Color de puntos:</label>
+    <input type="color" id="color-picker" value="#a5a5ff">
+                         <button id="btn-clear" style="margin-top: 20px; width: 100%; padding: 8px; cursor: pointer;">
+                              Limpiar Lienzo
+                        </button>
+                        <button id="btn-mostrar-limites" style="margin-top: 20px; width: 100%; padding: 8px; cursor: pointer;">Mostrar Rectas</button>
+                        <div id="info-limites" class="info-container">
+                           
+                         </div>
                 </div>
             </aside>
 
             <section class="canvas-container">
-                <div id="canvas" class="quadtree-canvas">
+               <!-- <div id="canvas" class="quadtree-canvas"></div> -->
                     
-                </div>
+                <canvas id="canvas" class="quadtree-canvas" width="700" height="600"></canvas>
             </section>
 
         </div>
 
-        <footer class="footer"> </footer>
+        <footer class="footer"> © 2026 - Desarrollado por Wendy Nicol | Estudiante de Ingeniería Informatica </footer>
     </div>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     </body>
