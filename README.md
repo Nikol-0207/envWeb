@@ -4,9 +4,14 @@
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
+![EStructura](https://miro.medium.com/0*BiRdEcOFKrZp-qAQ.png)
+
+
+Este proyecto es un simulador interactivo de una estructura de datos **Quadtree**, diseñada para la organización eficiente de datos espaciales. Permite visualizar en tiempo real cómo se subdivide el plano bidimensional a medida que se insertan puntos, optimizando la búsqueda y el almacenamiento.
 
 ![EStructura](https://i.blogs.es/c3c00f/quadtree_arbol-20-1-/450_1000.webp)
-Este proyecto es un simulador interactivo de una estructura de datos **Quadtree**, diseñada para la organización eficiente de datos espaciales. Permite visualizar en tiempo real cómo se subdivide el plano bidimensional a medida que se insertan puntos, optimizando la búsqueda y el almacenamiento.
+
+
 ## ¿Qué es un Quadtree?
 Un quadtree (o árbol cuaternario) es una estructura de datos jerárquica en forma de árbol diseñada para dividir un espacio bidimensional (2D) subdividiéndolo recursivamente en cuatro cuadrantes o regiones. Cada nodo interno tiene exactamente cuatro hijos (noroeste, noreste, suroeste, sureste), lo que permite organizar datos espaciales (puntos, imágenes) de manera eficiente para búsquedas rápidas. 
 
