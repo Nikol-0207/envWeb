@@ -1,4 +1,4 @@
-# 🌳 Visualiación espacial de Quadtree (2D)
+# 🌳 Visualización espacial de Quadtree (2D)
 ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
 ![Flask](https://img.shields.io/badge/Framework-Flask-lightgrey.svg)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
