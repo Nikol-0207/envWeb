@@ -122,8 +122,83 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(err => console.error("Error al limpiar:", err));
 });
+   
+    document.getElementById('btn-buscar-por-coord').addEventListener('click', () => {
+    const inputSearch = document.getElementById('search-label');
+    const inputTarget = document.getElementById('target-label');
+    const valor = inputSearch.value.trim();
 
-    
+    if (!valor.includes(',')) {
+        alert("⚠️ Por favor ingrese las coordenadas en formato X,Y (ej: 123,134)");
+        return;
+    }
+
+    fetch('/buscar_vecino', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ coords: valor })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            inputTarget.value = `${data.label} (${Math.round(data.x)},${Math.round(data.y)})`;
+            
+            
+            redibujarTodo();
+            resaltarPunto(data.x, data.y);
+        } else {
+            alert("❌ No se pudo encontrar un vecino.");
+        }
+    })
+    .catch(err => console.error("Error:", err));
+});
+
+   document.getElementById('btn-buscar-coord').addEventListener('click', () => {
+    const nombreInput = document.getElementById('data-name');
+    const coordInput = document.getElementById('coordenadas');
+    const nombre = nombreInput.value.trim();
+
+    if (!nombre) {
+        alert("⚠️ Ingrese el nombre del punto (ej: A).");
+        return;
+    }
+
+    fetch('/buscar_por_nombre', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: nombre })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("No encontrado");
+        return res.json();
+    })
+    .then(data => {
+        
+        const x = data.x;
+        const y = data.y;
+        
+        coordInput.value = `${x},${y}`;
+        redibujarTodo(); // Limpiamos resaltados previos
+        resaltarPunto(data.x, data.y);
+    })
+    .catch(err => {
+        alert("❌ No existe el punto '" + nombre + "'");
+        coordInput.value = ""; 
+    });
+});
+
+// Función para dibujar un círculo de enfoque sobre el punto hallado
+function resaltarPunto(x, y) {
+    ctx.save();
+    ctx.strokeStyle = "#ffff00"; // Amarillo neón
+    ctx.lineWidth = 3;
+    ctx.setLineDash([5, 5]); // Línea punteada para que destaque
+    ctx.beginPath();
+    ctx.arc(x, y, 15, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+}    
+
     canvas.addEventListener('mousedown', (e) => {
         const rect = canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;

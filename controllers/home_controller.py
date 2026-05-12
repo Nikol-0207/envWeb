@@ -96,3 +96,50 @@ def buscar_y_renombrar_recursivo(nodo, antiguo, nuevo):
    
     return buscar_y_renombrar_recursivo(nodo.izq, antiguo, nuevo) or \
            buscar_y_renombrar_recursivo(nodo.der, antiguo, nuevo)
+
+@home_bp.route('/buscar_por_nombre', methods=['POST'])
+def buscar_por_nombre():
+    data = request.get_json()
+    nombre_buscado = data.get('nombre')
+    
+    # Buscamos el punto en el árbol
+    punto_encontrado = buscar_punto_recursivo(arbol.raiz, nombre_buscado)
+    
+    if punto_encontrado:
+        return jsonify({"status": "success", "x": punto_encontrado.x, "y": punto_encontrado.y})
+    return jsonify({"status": "error"}), 404
+
+def buscar_punto_recursivo(nodo, nombre):
+    if nodo is None:
+        return None
+    
+    # Si encontramos la etiqueta en el atributo 'data'
+    if nodo.punto.data == nombre:
+        return nodo.punto
+    
+    # Buscamos en ambos lados
+    izq = buscar_punto_recursivo(nodo.izq, nombre)
+    if izq: return izq
+    
+    return buscar_punto_recursivo(nodo.der, nombre)
+
+@home_bp.route('/buscar_vecino', methods=['POST'])
+def buscar_vecino():
+    data = request.get_json()
+    coords_raw = data.get('coords') # Viene como "123,134"
+    
+    try:
+        x_buscada, y_buscada = map(float, coords_raw.split(','))
+        
+        punto_cercano, distancia = arbol.buscar_mas_cercano(x_buscada, y_buscada)
+        
+        if punto_cercano:
+            return jsonify({
+                "status": "success",
+                "label": punto_cercano.data,
+                "x": punto_cercano.x,
+                "y": punto_cercano.y
+            })
+        return jsonify({"status": "error", "message": "Árbol vacío"}), 404
+    except:
+        return jsonify({"status": "error", "message": "Formato incorrecto (use X,Y)"}), 400
