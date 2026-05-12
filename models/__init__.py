@@ -1,2 +1,2 @@
-from .nodo import NodoQuad
-from .kdtree import Quadtree
+from .nodo import NodoTree
+from .kdtree import Kdtree

@@ -24,7 +24,13 @@ class Point:
     @property
     def data(self):
         return self._data
+    @property
+    def data(self):
+        return self._data
     
+    @data.setter
+    def data(self, valor):
+        self._data = str(valor)
     
     #Método especial para la depuracion 
     def __repr__(self):

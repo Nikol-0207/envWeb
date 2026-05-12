@@ -1,67 +1,98 @@
 from flask import render_template,Blueprint, request, jsonify
-from models.kdtree import Quadtree
+from models.kdtree import Kdtree
 from models.puntos import Point
 from models.recta import Rect
-
+import string
 home_bp = Blueprint('home', __name__)
-
-limite_pantalla = Rect(350, 300, 350, 300)
-arbol_espacial = Quadtree(limite_pantalla, 4)
-
+limite_inicial = Rect(350, 300, 350, 300)
+arbol = Kdtree()
+#Método auxiliar para etiquetar los puntosimport string
+contador_puntos = 0
+def generar_etiqueta(indice):
+    letras = string.ascii_uppercase # "ABC...Z"
+    ciclo = indice // 26
+    letra = letras[indice % 26]
+    if ciclo == 0:
+        return letra
+    else:
+        return f"{letra}{ciclo}"
+    
+#Endpoints
 @home_bp.route('/')
 def index():
-    global arbol_espacial 
-    arbol_espacial = Quadtree(limite_pantalla, 4)
     data = {"title": "Simulador Quadtree", "message": "¡Bienvenido!"}
     return render_template("index.html", data=data)
 
-@home_bp.route('/insertar', methods=['POST'])
+@home_bp.route('/insertar', method=['POST'])
 def insertar():
-    datos = request.get_json()
-    try:
-        x = float(datos.get('x'))
-        y = float(datos.get('y'))
-        
-        nuevo_punto = Point(x, y)
-        exito = arbol_espacial.insertar(nuevo_punto)
-        
-        if exito:
-            return jsonify({
-                "status": "success",
-                "cuadros": [
-                    {"x": r.x, "y": r.y, "w": r.ancho, "h": r.alto} 
-                    for r in arbol_espacial.obtener_todos_los_limites()
-                ]
-            })
-        return jsonify({"status": "error", "message": "Fuera de límites"}), 400
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 400
+    global contador_puntos
+    etiqueta = generar_etiqueta(contador_puntos)
+    contador_puntos += 1
+    data = request.get_json()
+    nuevo_punto = Point(data['x'], data['y'], data=etiqueta)
+
+    arbol.insertar(nuevo_punto)
+
+    lineas_para_js = []
+    exportar_lineas_recursivo(arbol.raiz, limite_inicial, lineas_para_js)
+    
+    return jsonify({
+        "status": "success",
+        "lineas": lineas_para_js,
+        "punto_nuevo": {"x": data['x'], "y": data['y'], "label": etiqueta}
+    })
+
+
+def exportar_lineas_recursivo(nodo, rect_actual, lista):
+    if nodo is None:
+        return
+    
+    lista.append({
+        "punto": {"x": nodo.punto.x, "y": nodo.punto.y},
+        "eje": nodo.eje,
+        "limite": {
+            "x": rect_actual.x, 
+            "y": rect_actual.y, 
+            "w": rect_actual.ancho, 
+            "h": rect_actual.alto
+        }
+    })
+    
+    rect_izq, rect_der = rect_actual.partir(nodo.punto, nodo.eje)
+    
+    exportar_lineas_recursivo(nodo.izq, rect_izq, lista)
+    exportar_lineas_recursivo(nodo.der, rect_der, lista)
 
 @home_bp.route('/limpiar', methods=['POST'])
 def limpiar():
-    global arbol_espacial 
-    datos = request.get_json(silent=True)
-    capacidad = datos.get('capacidad', 4) if datos else 4
-    #arbol_espacial = Quadtree(limite_pantalla, 4) 
-    arbol_espacial = Quadtree(limite_pantalla, int(capacidad))
-    # Devolvemos el cuadro inicial para que el canvas no quede totalmente vacío
-    return jsonify({
-        "status": "success", 
-        "message": "Árbol reiniciado",
-        "cuadros": [{"x": 350, "y": 300, "w": 350, "h": 300}]
-    })    
-@home_bp.route('/obtener_limites', methods=['GET'])
-def obtener_limites():
-    try:
-        limites = arbol_espacial.obtener_todos_los_limites()
-        
-        # Serializamos los objetos Rect a diccionarios para el JSON
-        return jsonify({
-            "status": "success",
-            "cuadros": [
-                {"x": r.x, "y": r.y, "w": r.ancho, "h": r.alto} 
-                for r in limites
-            ]
-        })
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 400
+     global arbol
+     arbol= Kdtree()
+     contador_puntos=0
+     return jsonify({"status": "success", "message": "Árbol reiniciado"})  
+
+@home_bp.route('/renombrar', methods=['POST'])
+def renombrar():
+    data = request.get_json()
+    nombre_antiguo = data.get('oldName')
+    nombre_nuevo = data.get('newName')
+    
+    # Buscamos el punto en el árbol y cambiamos su data
+    punto_encontrado = buscar_y_renombrar_recursivo(arbol.raiz, nombre_antiguo, nombre_nuevo)
+    
+    if punto_encontrado:
+        return jsonify({"status": "success", "message": f"Punto {nombre_antiguo} renombrado a {nombre_nuevo}"})
+    else:
+        return jsonify({"status": "error", "message": "Punto no encontrado"}), 404
+
+def buscar_y_renombrar_recursivo(nodo, antiguo, nuevo):
+    if nodo is None:
+        return False
+    
+    # Si el dato coincide, lo renombramos
+    if nodo.punto.data == antiguo:
+        nodo.punto.data = nuevo # Usamos el setter de la clase Point
+        return True
+    
+   
+    return buscar_y_renombrar_recursivo(nodo.izq, antiguo, nuevo) or \
+           buscar_y_renombrar_recursivo(nodo.der, antiguo, nuevo)

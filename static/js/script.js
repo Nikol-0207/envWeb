@@ -4,63 +4,130 @@ const arrow =document.querySelector('.arrow');
 const capacidadInput= document.getElementById('capacidad');
 
 toggleBtn.addEventListener('click', () => {
-    // Alterna la clase 'hidden' en el contenido
-    content.classList.toggle('hidden');
     
-    // Alterna la clase 'collapsed' en la flecha para que gire
+    content.classList.toggle('hidden');
     arrow.classList.toggle('collapsed');
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    
     const canvas = document.getElementById('canvas');
-    if (!canvas) {
-        console.error("¡ERROR! No se encontró el elemento con ID 'canvas'");
-        return;
-    }
+    if (!canvas) return;
+    
     const ctx = canvas.getContext('2d');
     const colorPicker = document.getElementById('color-picker');
     const countDisplay = document.getElementById('count');
-    const btnClear = document.getElementById('btn-clear');
 
+    // Variables de estado
     let todosLosPuntos = [];
-    let todosLosCuadros = [];
+    let todasLasLineas = [];
 
     function redibujarTodo() {
-        console.log("Redibujando... Cuadros:", todosLosCuadros.length, "Puntos:", todosLosPuntos.length);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Dibujar Cuadrículas
-        ctx.strokeStyle = "#dce2df"; 
-        ctx.lineWidth = 1;
-        todosLosCuadros.forEach(r => {
-            ctx.strokeRect(r.x - r.w, r.y - r.h, r.w * 2, r.h * 2);
+        // Dibujar Líneas de División
+        ctx.lineWidth = 2;
+        todasLasLineas.forEach(linea => {
+            // Rojo para divisiones en X (Vertical), Azul para Y (Horizontal)
+            ctx.strokeStyle = linea.eje === 0 ? "#ff4d4d" : "#4d79ff";
+            ctx.beginPath();
+            
+            if (linea.eje === 0) {
+                // Eje X: Línea vertical limitada por el rectángulo padre
+                ctx.moveTo(linea.punto.x, linea.limite.y - linea.limite.h);
+                ctx.lineTo(linea.punto.x, linea.limite.y + linea.limite.h);
+            } else {
+                // Eje Y: Línea horizontal limitada por el rectángulo padre
+                ctx.moveTo(linea.limite.x - linea.limite.w, linea.punto.y);
+                ctx.lineTo(linea.limite.x + linea.limite.w, linea.punto.y);
+            }
+            ctx.stroke();
         });
 
-        // Dibujar Puntos
         todosLosPuntos.forEach(p => {
             ctx.save();
-
-            ctx.shadowColor = p.color; // Color del resplandor
-            ctx.shadowBlur = 15;        
-            ctx.shadowOffsetX = 0;
-             ctx.shadowOffsetY = 0;
-
+            ctx.shadowColor = p.color;
+            ctx.shadowBlur = 15;
             ctx.fillStyle = p.color;
             ctx.beginPath();
-            ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+            ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
             ctx.fill();
-
-           // ctx.restore();
+            ctx.restore();
+            if (p.label) {
+                ctx.save();
+                ctx.fillStyle = "white"; 
+                ctx.font = "bold 14px Arial";
+                ctx.textAlign = "center";
+               
+                ctx.fillText(p.label, p.x, p.y - 12); 
+                ctx.restore();
+            }
         });
     }
+    document.getElementById('btn-renombrar').addEventListener('click', () => {
+    const oldNameEl = document.getElementById('old-name');
+    const newNameEl = document.getElementById('new-name');
 
+   
+    const oldName = oldNameEl.value.trim();
+    const newName = newNameEl.value.trim();
+    if (!oldName || !newName){
+        alert("⚠️ Por favor, complete ambos campos para renombrar el punto.");
+        return; 
+    }
+
+    fetch('/renombrar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldName, newName })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            //Actualizar el nombre en nuestra lista local de puntos
+            const punto = todosLosPuntos.find(p => p.label === oldName);
+            if (punto) {
+                punto.label = newName;
+                // Limpiar los inputs
+                oldNameEl.value = "";
+                newNameEl.value = "";
+                
+               
+                redibujarTodo();
+            }
+        } else {
+            alert("⚠️ No se encuentra el punto con ese nombre, ingrese una data que exista.");
+    
+        }
+    })
+    .catch(err => console.error("Error al renombrar:", err));
+});
+    const btnClear = document.getElementById('btn-clear');
+     btnClear.addEventListener('click', () => {
+    fetch('/limpiar', { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "success") {
+            
+            todosLosPuntos = [];
+            todasLasLineas = [];
+            
+            //Resetear el contador visual
+            if(countDisplay) countDisplay.innerText = "0";
+            
+            // Limpiar el dibujo del canvas
+            redibujarTodo();
+            
+            console.log("Sistema reiniciado con éxito");
+        }
+    })
+    .catch(err => console.error("Error al limpiar:", err));
+});
+
+    
     canvas.addEventListener('mousedown', (e) => {
         const rect = canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-
-        console.log(`Clic detectado en: ${x}, ${y}`);
 
         fetch('/insertar', {
             method: 'POST',
@@ -69,100 +136,25 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(res => res.json())
         .then(data => {
-            console.log("Respuesta de Flask:", data);
             if (data.status === "success") {
-                todosLosPuntos.push({ x: x, y: y, color: colorPicker.value });
-                todosLosCuadros = data.cuadros;
+              
+                todosLosPuntos.push({ 
+                x: x, 
+                y: y, 
+                color: colorPicker.value,
+                label: data.punto_nuevo.label 
+           });
+                todasLasLineas = data.lineas; 
+                
                 if(countDisplay) countDisplay.innerText = todosLosPuntos.length;
                 redibujarTodo();
             }
         })
-        .catch(err => console.error("Error en Fetch:", err));
-    }); 
-       
-        
-     const btnMostrarLimites = document.getElementById('btn-mostrar-limites');
-const infoLimites = document.getElementById('info-limites');
-
-btnMostrarLimites.addEventListener('click', () => {
-    fetch('/obtener_limites')
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === "success") {
-            // Actualizar el dibujo en el Canvas
-            todosLosCuadros = data.cuadros;
-            redibujarTodo();
-            
-            //Mostrar la info debajo del botón
-            // Limpiamos el contenido previo
-            infoLimites.innerHTML = `<h3>Nodos detectados: ${data.cuadros.length}</h3>`;
-            
-            const lista = document.createElement('ul');
-            data.cuadros.forEach((r, index) => {
-                const item = document.createElement('li');
-                item.style.marginBottom = "5px";
-                item.innerHTML = `<strong>Nodo ${index + 1}:</strong> Centro(${r.x}, ${r.y}) | Radio(${r.w}x${r.h})`;
-                lista.appendChild(item);
-            });
-            
-            infoLimites.appendChild(lista);
-        }
-    })
-    .catch(err => {
-        infoLimites.innerHTML = `<p style="color: red;">Error: No se pudo conectar con el servidor.</p>`;
+        .catch(err => console.error("Error en la petición:", err));
     });
 });
 
-    btnClear.addEventListener('click', () => {
-          todosLosPuntos = [];
-          todosLosCuadros = [];
-           pointsCount = 0;
-          if(countDisplay) countDisplay.innerText = 0;
 
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-           fetch('/limpiar', { method: 'POST' })
-           .then(res => res.json())
-           .then(data => {
-          todosLosCuadros = data.cuadros;
-           redibujarTodo(); // Esto dibujará solo el rectángulo exterior inicial
-           if(document.getElementById('info-limites')) {
-            document.getElementById('info-limites').innerHTML = "";
-        }
-      }); 
-        console.log("Lienzo limpio");
-          
-    });
-
-    capacidadInput.addEventListener('change', () => {
-    let nuevaCapacidad = parseInt(capacidadInput.value);
-
-    
-    if (isNaN(nuevaCapacidad) || nuevaCapacidad < 1) {
-        alert("La capacidad debe ser al menos 1");
-        capacidadInput.value = 4; // Reset visual
-        return;
-    }
-
-    // Enviamos la orden de reinicio con la nueva capacidad
-    fetch('/limpiar', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ capacidad: nuevaCapacidad })
-    })
-    .then(res => res.json())
-    .then(data => {
-        // Limpiamos todo el estado local
-        todosLosPuntos = [];
-        todosLosCuadros = data.cuadros;
-        pointsCount = 0;
-        if(countDisplay) countDisplay.innerText = 0;
-        
-        // Redibujamos el lienzo (ahora solo quedará el cuadro raíz)
-        redibujarTodo();
-        console.log("Árbol reiniciado con capacidad:", nuevaCapacidad);
-    });
-});
-});
 
 
 

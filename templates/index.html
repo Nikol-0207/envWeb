@@ -18,14 +18,45 @@
                     <span class="arrow">▼</span>
                 </div>
                 <div class="sidebar-content" id="params-content">
-                    <label for="capacidad">Capacidad:</label>
-                    <input type="number" id="capacidad" value="4" min="4" >
-                    
-
     
                     <p class="stats">Puntos: <span id="count">0</span></p>
                     <label for="color-picker" style="margin-top: 15px;">Color de puntos:</label>
     <input type="color" id="color-picker" value="#a5a5ff">
+                       <hr style="margin: 20px 0; border: 0; border-top: 1px solid #444;">
+
+        <div class="search-section">
+            <h3>Búsqueda</h3>
+            
+            <div class="input-group">
+                <label>Punto más cercano a:</label>
+                <div style="display: flex; gap: 5px; align-items: center;">
+                    <input type="text" id="search-label" placeholder="Ej: A" style="width: 40px;">
+                    <span>→</span>
+                    <input type="text" id="target-label" style="width: 40px;">
+                </div>
+            </div>
+
+            <div class="input-group" style="margin-top: 10px;">
+                <label>Coordenada del punto:</label>
+                <div style="display: flex; gap: 5px;">
+                    <input type="number" id="coord-x" placeholder="A.." style="width: 60px;">
+                    <input type="number" id="coord-y" placeholder="12,30" style="width: 60px;">
+                </div>
+                <button id="btn-buscar-coord" class="btn-action">Buscar</button>
+            </div>
+
+            <hr style="margin: 15px 0; border: 0; border-top: 1px dotted #555;">
+
+            <div class="input-group">
+                <label>Renombrar puntos:</label>
+                <div style="display: flex; gap: 5px; align-items: center;">
+                    <input type="text" id="old-name" placeholder="A" style="width: 45px;">
+                    <span>por</span>
+                    <input type="text" id="new-name" placeholder="P1" style="width: 45px;">
+                </div>
+                <button id="btn-renombrar" class="btn-action">Renombrar</button>
+            </div>
+        </div>
                          <button id="btn-clear" style="margin-top: 20px; width: 100%; padding: 8px; cursor: pointer;">
                               Limpiar Lienzo
                         </button>
