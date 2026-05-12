@@ -1,5 +1,5 @@
 from flask import render_template,Blueprint, request, jsonify
-from models.quadtree import Quadtree
+from models.kdtree import Quadtree
 from models.puntos import Point
 from models.recta import Rect
 

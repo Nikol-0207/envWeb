@@ -1,8 +1,8 @@
 from .puntos import Point
 class Rect:
     def __init__(self, x: float, y: float, ancho: float, alto: float):
-        self._x = x  # Coordenada X del centro
-        self._y = y  # Coordenada Y del centro
+        self._x = x  
+        self._y = y  
         self._ancho = ancho  
         self._alto = alto    
 
@@ -42,40 +42,51 @@ class Rect:
         self._alto = float(v)
     
     """Implementacion"""
-    def contains (self, point: Point):
-
+    def contains(self, point: Point):
         return (point.x >= self.x - self.ancho and
-            point.x <= self.x + self.ancho and
-            point.y >= self.y - self.alto and
-            point.y <= self.y + self.alto) 
+                point.x <= self.x + self.ancho and
+                point.y >= self.y - self.alto and
+                point.y <= self.y + self.alto)
+
     def intersects(self, otro):
-        """
-        Verifica si este rectángulo se solapa con otro objeto Rect.
-        """
-        # Comprobamos si las áreas están totalmente separadas.
-        # Si alguna de estas condiciones es True, NO hay intersección.
         fuera = (otro.x - otro.ancho > self.x + self.ancho or  
                  otro.x + otro.ancho < self.x - self.ancho or  
                  otro.y - otro.alto > self.y + self.alto or   
                  otro.y + otro.alto < self.y - self.alto)     
-
         return not fuera
-    
-    def subdividir(self):
-        """Calcula y retorna los 4 cuadrantes hijos (NW, NE, SW, SE)"""
-        mitad_w = self.ancho / 2
-        mitad_h = self.alto / 2
-        
-        return {
-            'nw': Rect(self.x - mitad_w, self.y - mitad_h, mitad_w, mitad_h),
-            'ne': Rect(self.x + mitad_w, self.y - mitad_h, mitad_w, mitad_h),
-            'sw': Rect(self.x - mitad_w, self.y + mitad_h, mitad_w, mitad_h),
-            'se': Rect(self.x + mitad_w, self.y + mitad_h, mitad_w, mitad_h)
-        }
 
-
+    def partir(self, punto: Point, eje: int):
+        """
+        Divide este rectángulo en dos basándose en la posición de un punto y un eje.
+        eje 0 = Vertical (X), eje 1 = Horizontal (Y)
+        """
+        if eje == 0: # División Vertical (Eje X)
+            # El nuevo ancho de los hijos es la distancia desde el borde hasta el punto
+            ancho_izq = (punto.x - (self.x - self.ancho)) / 2
+            ancho_der = ((self.x + self.ancho) - punto.x) / 2
+            
+            centro_x_izq = (self.x - self.ancho) + ancho_izq
+            centro_x_der = (self.x + self.ancho) - ancho_der
+            
+            return (
+                Rect(centro_x_izq, self.y, ancho_izq, self.alto), # Izquierda
+                Rect(centro_x_der, self.y, ancho_der, self.alto)  # Derecha
+            )
+        else: # División Horizontal (Eje Y)
+            alto_inf = (punto.y - (self.y - self.alto)) / 2
+            alto_sup = ((self.y + self.alto) - punto.y) / 2
+            
+            centro_y_inf = (self.y - self.alto) + alto_inf
+            centro_y_sup = (self.y + self.alto) - alto_sup
+            
+            return (
+                Rect(self.x, centro_y_inf, self.ancho, alto_inf), # Abajo (Izquierda en árbol)
+                Rect(self.x, centro_y_sup, self.ancho, alto_sup)  # Arriba (Derecha en árbol)
+            )
 
     def __repr__(self):
-        """Método para visualizar el objeto en consola"""
-        return f"Rect(Centro:({self.x},{self.y}), Radio_W:{self.ancho}, Radio_H:{self.alto})"
+        return f"Rect(({self.x},{self.y}), w:{self.ancho}, h:{self.alto})"
+    
 
+
+    
